@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OTP Input States</title>
+  <link rel="stylesheet" href="src/otp/otp.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: #f9fafb;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #101828;
+    }
+    main { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .intro { color: #667085; margin: 0 0 32px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 12px;
+      padding: 20px;
+      min-width: 0;
+    }
+    .card h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #667085;
+      margin: 0 0 16px;
+    }
+    .card--demo { grid-column: 1 / -1; }
+    .demo-hint { font-size: 13px; color: #667085; margin: 16px 0 0; }
+    @media (max-width: 460px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OTP input</h1>
+    <p class="intro">Every state of the component, plus a live demo.</p>
+
+    <div class="grid">
+      <section class="card"><h2>Empty</h2><div id="otp-empty"></div></section>
+      <section class="card"><h2>Filling</h2><div id="otp-filling"></div></section>
+      <section class="card"><h2>Focus</h2><div id="otp-focus"></div></section>
+      <section class="card"><h2>Complete</h2><div id="otp-complete"></div></section>
+      <section class="card"><h2>Error</h2><div id="otp-error"></div></section>
+      <section class="card"><h2>Resend timer</h2><div id="otp-timer"></div></section>
+
+      <section class="card card--demo">
+        <h2>Interactive</h2>
+        <div id="otp-demo"></div>
+        <p class="demo-hint">The correct demo code is <strong>123456</strong>. Any other code shows the error state.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="src/otp/otp.js"></script>
+  <script>
+    const hint = "We sent a 6-digit code to your phone.";
+    const $ = (id) => document.getElementById(id);
+
+    // Static snapshots. They have no running timer, so the resend line shows its idle state.
+    new OtpInput($("otp-empty"), { hint, autoStartTimer: false });
+
+    const filling = new OtpInput($("otp-filling"), { hint, autoStartTimer: false });
+    filling.setValue("123");
+
+    const focus = new OtpInput($("otp-focus"), { hint, autoStartTimer: false });
+    focus.setValue("12");
+    focus.cells[2].classList.add("is-focused");
+
+    const complete = new OtpInput($("otp-complete"), { hint, autoStartTimer: false });
+    complete.setValue("123456");
+
+    const error = new OtpInput($("otp-error"), { hint, autoStartTimer: false });
+    error.setValue("123455");
+    error.setError("Incorrect code. Please try again.");
+
+    // Timer stays running so the countdown is visible.
+    new OtpInput($("otp-timer"), { hint, resendSeconds: 59 });
+
+    // Live demo
+    const demo = new OtpInput($("otp-demo"), {
+      hint,
+      resendSeconds: 30,
+      onComplete(code) {
+        if (code !== "123456") demo.setError("Incorrect code. Please try again.");
+      },
+    });
+  </script>
+</body>
+</html>
